@@ -10,12 +10,9 @@ let app = require('./app');
 
 router.get("/hi", function(req, res,next){
     console.log("Hey");
-    next();
+
 });
 
-router.get("/hi", function(req, res){
-  console.log("Bye");
-});
 
 router.post("/insertTestData", function(req, res){
   console.log("Hello");
@@ -190,7 +187,7 @@ router.post("/insertListingData", function(req,res){
 
   app.con.query(sql, values, function(err, result) {
     if(err) return console.log(err);
-    console.log("Listing inserted");
+    console.log("Listing data inserted");
     console.log(result);
     res.json({
       "id": result.insertId
@@ -199,8 +196,14 @@ router.post("/insertListingData", function(req,res){
 });
 
 router.post("/insertListingImages", function(req, res){
+  console.log("--INSERT LISTING IMAGES--")
   let sql = `INSERT INTO airbnb.images(image_path, listing_id) VALUES(?, ?)`
   let values = [req.body.image_path, req.body.listing_id];
+  app.con.query(sql, values, function(err, result) {
+    if(err) return console.log(err);
+    console.log("Image listing inserted");
+    console.log(result);
+  });
 
 });
 
