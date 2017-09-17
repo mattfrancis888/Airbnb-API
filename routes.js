@@ -9,8 +9,13 @@ let router = express.Router();
 let app = require('./app');
 
 router.get("/hi", function(req, res,next){
+  let array = [];
     console.log("Hey");
-
+      array.push({id:"1"});
+            array[0]["name"] = "Me";
+            res.json({
+              "result" : array
+            });
 });
 
 
@@ -148,9 +153,32 @@ router.post("/insertListingData", function(req,res){
     parking,
     elevator,
     pool,
-    gym
+    gym,
+
+    place_description,
+    place_title,
+
+    suitable_for_children,
+    suitable_for_infants,
+    suitable_for_pets,
+    smoking_allowed,
+    parties_allowed,
+    additional_rules,
+    listing_length,
+    arrive_after,
+    leave_before,
+    min_stay,
+    max_stay,
+    price,
+
+    date_listed
+
   )
-  VALUES(?, ?, ?, ? ,? ,?, ?, ?, ? ,? , ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`
+  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+     ?, ?, ?, ?);`
 
   let values = [
     req.body.user_id,
@@ -182,8 +210,27 @@ router.post("/insertListingData", function(req,res){
     req.body.parking,
     req.body.elevator,
     req.body.pool,
-    req.body.gym
+    req.body.gym,
+
+    req.body.place_description,
+    req.body.place_title,
+
+    req.body.suitable_for_children,
+    req.body.suitable_for_infants,
+    req.body.suitable_for_pets,
+    req.body.smoking_allowed,
+    req.body.parties_allowed,
+    req.body.additional_rules,
+    req.body.listing_length,
+    req.body.arrive_after,
+    req.body.leave_before,
+    req.body.min_stay,
+    req.body.max_stay,
+    req.body.price,
+
+    req.body.date_listed
   ];
+
 
   app.con.query(sql, values, function(err, result) {
     if(err) return console.log(err);
@@ -194,6 +241,7 @@ router.post("/insertListingData", function(req,res){
     });
   });
 });
+
 
 router.post("/insertListingImages", function(req, res){
   console.log("--INSERT LISTING IMAGES--")
@@ -206,6 +254,48 @@ router.post("/insertListingImages", function(req, res){
   });
 
 });
+
+router.get("/listingImageAndTitle/:user_id", function(req, res){
+  let sql = `SELECT * FROM airbnb.listings WHERE user_id = ?;`
+  let values = [req.params.user_id];
+  let listing_id_array = [];
+  let listing_data_array = [];
+
+
+  //get place_title and listing_id (for images table) in listing table
+  app.con.query(sql, values, function(err, result){
+    for(let i = 0; i < result.length; i++){
+      console.log("Love you");
+      listing_id_array.push(result[i].id);
+      listing_data_array.push({
+        id:result[i].id,
+        place_title: result[i].place_title
+      });
+
+
+    }
+    //get image_path in images table
+    for(let i = 0; i < listing_id_array.length; i ++){
+        console.log("Forever");
+      let sql = `SELECT * FROM airbnb.images WHERE listing_id = ?;`
+      let values = [listing_id_array[i]];
+      console.log(listing_id_array[i] + "");
+
+      app.con.query(sql, values, function(err, result){
+        console.log(result[0].image_path);
+        listing_data_array[i]["image_path"] = result[i].image_path;
+        if(i == listing_id_array.length - 1){
+          console.log("and ever");
+          res.json({
+            "result" :  listing_data_array
+          });
+        }
+      });
+    }
+
+  });
+});
+
 
 
 module.exports = router;
