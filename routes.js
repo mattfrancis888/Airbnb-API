@@ -377,5 +377,39 @@ router.get("/listingData/:id", function(req, res){
 
 });
 
+//profile  section
+router.post("/insertProfileImagePath/:id/:profile_image_path", function(req, res){
+  let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.profile_image_path = ? WHERE airbnb.user_authentication.id = ?;`;
+  let values = [req.params.profile_image_path, req.params.id];
+  app.con.query(sql, values, function(err, result){
+    console.log("--INSERT PROFILE IMAGE PATH--");
+    if(err) return console.log(err);
+    console.log(`Updated profile_image_path or profile_pic`);
+    res.sendStatus(200);
+  });
+});
+
+router.get("/getUserData/:id", function(req, res){
+  let sql = `SELECT * FROM airbnb.user_authentication WHERE airbnb.user_authentication.id = ?;`;
+  let values = [req.params.id];
+  app.con.query(sql, values, function(err, result){
+    console.log("--GET PROFILE IMAGE PATH--");
+    if(err) return console.log(err);
+    console.log("Retrieved user_authentication");
+    res.json({
+      "id": result[0].id,
+      "first_name": result[0].first_name,
+      "last_name": result[0].last_name,
+      "email": result[0].email,
+      "password": result[0].password,
+      "phone_num":  result[0].phone_num,
+      "profile_image_path":result[0].profile_image_path,
+      "gender": result[0].gender,
+      "location" : result[0].location,
+      "work" : result[0].work
+    });
+  });
+});
+
 
 module.exports = router;
