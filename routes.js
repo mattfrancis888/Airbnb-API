@@ -389,6 +389,40 @@ router.post("/insertProfileImagePath/:id/:profile_image_path", function(req, res
   });
 });
 
+router.post("/insertLocationDetailEdit/:id", function(req, res){
+  let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.location = ? WHERE airbnb.user_authentication.id = ?;`;
+  let values = [req.body.location, req.params.id];
+  app.con.query(sql, values, function(err, result){
+    console.log("--INSERT PROFILE IMAGE PATH--");
+    if(err) return console.log(err);
+    console.log(`Updated profile_image_path or profile_pic`);
+    res.sendStatus(200);
+  });
+});
+
+
+router.post("/insertWorkDetailEdit/:id", function(req, res){
+  let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.work = ? WHERE airbnb.user_authentication.id = ?;`;
+  let values = [req.body.work, req.params.id];
+  app.con.query(sql, values, function(err, result){
+    console.log("--INSERT WORK--");
+    if(err) return console.log(err);
+    console.log(`Updated work`);
+    res.sendStatus(200);
+  });
+});
+
+router.post("/insertLanguagesDetailEdit/:id/", function(req, res){
+  let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.languages = ? WHERE airbnb.user_authentication.id = ?;`;
+  let values = [req.body.languages, req.params.id];
+  app.con.query(sql, values, function(err, result){
+    console.log("--INSERT LANGUAGES--");
+    if(err) return console.log(err);
+    console.log(`Updated languages`);
+    res.sendStatus(200);
+  });
+});
+
 router.get("/getUserData/:id", function(req, res){
   let sql = `SELECT * FROM airbnb.user_authentication WHERE airbnb.user_authentication.id = ?;`;
   let values = [req.params.id];
