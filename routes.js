@@ -389,6 +389,20 @@ router.post("/insertProfileImagePath/:id/:profile_image_path", function(req, res
   });
 });
 
+router.post("/insertAboutMe/:id", function(req, res){
+  if(req.body.about_me == ""){
+    req.body.about_me = null;
+  }
+  let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.about_me = ? WHERE airbnb.user_authentication.id = ?;`;
+  let values = [req.body.about_me, req.params.id];
+  app.con.query(sql, values, function(err, result){
+    console.log("--INSERT ABOUT ME--");
+    if(err) return console.log(err);
+    console.log(`Updated about me`);
+    res.sendStatus(200);
+  });
+});
+
 router.post("/insertEmailDetailEdit/:id/", function(req, res){
   let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.email = ? WHERE airbnb.user_authentication.id = ?;`;
   let values = [req.body.email, req.params.id];
@@ -471,9 +485,10 @@ router.get("/getUserData/:id", function(req, res){
       "password": result[0].password,
       "phone_num":  result[0].phone_num,
       "profile_image_path":result[0].profile_image_path,
-      "gender": result[0].gender,
+      "about_me": result[0].about_me,
       "location" : result[0].location,
-      "work" : result[0].work
+      "work" : result[0].work,
+      "languages" : result[0].languages
     });
   });
 });
