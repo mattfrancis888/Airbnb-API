@@ -389,19 +389,49 @@ router.post("/insertProfileImagePath/:id/:profile_image_path", function(req, res
   });
 });
 
+router.post("/insertEmailDetailEdit/:id/", function(req, res){
+  let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.email = ? WHERE airbnb.user_authentication.id = ?;`;
+  let values = [req.body.email, req.params.id];
+  app.con.query(sql, values, function(err, result){
+    console.log("--INSERT EMAIL--");
+    if(err) return console.log(err);
+    console.log(`Updated email`);
+    res.sendStatus(200);
+  });
+});
+
+
+router.post("/insertPhoneNumDetailEdit/:id/", function(req, res){
+  let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.phone_num = ? WHERE airbnb.user_authentication.id = ?;`;
+  let values = [req.body.phone_num, req.params.id];
+  app.con.query(sql, values, function(err, result){
+    console.log("--INSERT PHONE NUM--");
+    if(err) return console.log(err);
+    console.log(`Updated phone num`);
+    res.sendStatus(200);
+  });
+});
+
+
 router.post("/insertLocationDetailEdit/:id", function(req, res){
+  if(req.body.location == ""){
+    req.body.location = null;
+  }
   let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.location = ? WHERE airbnb.user_authentication.id = ?;`;
   let values = [req.body.location, req.params.id];
   app.con.query(sql, values, function(err, result){
     console.log("--INSERT PROFILE IMAGE PATH--");
     if(err) return console.log(err);
-    console.log(`Updated profile_image_path or profile_pic`);
+    console.log(`Updated location`);
     res.sendStatus(200);
   });
 });
 
 
 router.post("/insertWorkDetailEdit/:id", function(req, res){
+  if(req.body.work == ""){
+    req.body.work = null;
+  }
   let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.work = ? WHERE airbnb.user_authentication.id = ?;`;
   let values = [req.body.work, req.params.id];
   app.con.query(sql, values, function(err, result){
@@ -413,6 +443,9 @@ router.post("/insertWorkDetailEdit/:id", function(req, res){
 });
 
 router.post("/insertLanguagesDetailEdit/:id/", function(req, res){
+  if(req.body.languages == ""){
+    req.body.languages = null;
+  }
   let sql = `UPDATE airbnb.user_authentication SET airbnb.user_authentication.languages = ? WHERE airbnb.user_authentication.id = ?;`;
   let values = [req.body.languages, req.params.id];
   app.con.query(sql, values, function(err, result){
