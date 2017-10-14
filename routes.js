@@ -243,6 +243,18 @@ router.post("/insertListingData", function(req,res){
 });
 
 
+router.get("/totalListingsData", function(req, res){
+  let sql = `SELECT COUNT(*) AS total_listings FROM airbnb.listings `;
+  app.con.query(sql, function(err, result) {
+    if(err) return console.log(err);
+    console.log("--TOTAL LISTINGS ---");
+    res.json({
+      "total_listings": result[0].total_listings
+    })
+    console.log(result[0].total_listings);
+  });
+});
+
 router.post("/insertListingImages", function(req, res){
   console.log("--INSERT LISTING IMAGES--")
   let values = [];
@@ -287,33 +299,35 @@ router.get("/listingImageAndTitle/:user_id", function(req, res){
     for(let i = 0; i < view_listing_id_array.length; i ++){
       let sql = `SELECT * FROM airbnb.images WHERE listing_id = ?;`
       let values = [view_listing_id_array[i]];
-      console.log(view_listing_id_array[i] + "");
+      console.log(view_listing_id_array[i]);
 
       app.con.query(sql, values, function(err, result){
-        console.log(result[0].image_path);
-        view_listing_data_array[i]["image_path"] = result[i].image_path;
+        if(err) return console.log(err);
+        view_listing_data_array[i]["image_path"] = result[0].image_path;
+          console.log(result);
         if(i == view_listing_id_array.length - 1){
-
           res.json({
             "result" :  view_listing_data_array
           });
         }
       });
+
     }
+
 
   });
 });
 
 //GET ID of listings table to show lisitng data
 router.get("/listingData/:id", function(req, res){
-  // let sql = `SELECT * FROM airbnb.listings WHERE id = ?;`
+  console.log("--LISTING DATA--");
   let sql = `SELECT * FROM airbnb.listings
   INNER JOIN airbnb.images ON airbnb.listings.id = airbnb.images.listing_id
   WHERE airbnb.listings.id = ?`
   let listing_image_data= [];
   let values = [req.params.id]
   app.con.query(sql, values, function(err, result){
-    console.log(result.length + "Love you :)");
+    console.log(result.length + " image(s) in listing");
     for(let i = 0; i < result.length; i++){
       listing_image_data.push({
         "image_path": result[i].image_path,
@@ -321,6 +335,7 @@ router.get("/listingData/:id", function(req, res){
         "listing_id": result[i].listing_id
       });
     }
+    console.log(result);
   res.json({
         "id": result[0].id,
         "property_ownership": result[0].property_ownership,
@@ -492,6 +507,9 @@ router.get("/getUserData/:id", function(req, res){
     });
   });
 });
+
+//end of profile section
+
 
 
 module.exports = router;
