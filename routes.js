@@ -16,6 +16,14 @@ router.get("/hi", function(req, res,next){
             res.json({
               "result" : array
             });
+            let sql = `SELECT * FROM airbnb.listings`
+            for(let i = 0; i < 2; i ++){
+              app.con.query(sql, function(err, result){
+                  console.log("for-loop MYSQL");
+              });
+            console.log("for-loop");
+            }
+            console.log("out of for-loop");
 });
 
 
@@ -291,11 +299,8 @@ router.get("/listingImageAndTitle/:user_id", function(req, res){
         id:result[i].id,
         place_title: result[i].place_title
       });
-
-
     }
-
-    //get image_path  in images table
+    //get image_path  in images table from each listing
     for(let i = 0; i < view_listing_id_array.length; i ++){
       let sql = `SELECT * FROM airbnb.images WHERE listing_id = ?;`
       let values = [view_listing_id_array[i]];
@@ -311,10 +316,7 @@ router.get("/listingImageAndTitle/:user_id", function(req, res){
           });
         }
       });
-
     }
-
-
   });
 });
 
@@ -391,6 +393,54 @@ router.get("/listingData/:id", function(req, res){
   });
 
 });
+
+
+router.get("/multipleListingsData/:showRowsAfter/:showAmountOfRows", function(req, res){
+  console.log("--MULTIPLE LISTING DATA--");
+  let sql = `SELECT * FROM airbnb.listings LIMIT ?, 4`;
+  let values = [parseInt(req.params.showRowsAfter)];
+  let listing_id_array = [];
+  let listing_data_array = [];
+
+
+  //get place_title and listing_id (for images table) in listing table
+  app.con.query(sql, values, function(err, result){
+    if(err) return console.log(err);
+    console.log(result);
+    for(let i = 0; i < result.length; i++){
+      listing_id_array.push(result[i].id);
+      listing_data_array.push({
+        "id":result[i].id,
+        "property_ownership": result[0].property_ownership,
+        "property_type" : result[0].property_type,
+        "total_beds": result[0].total_beds,
+        "place_title": result[i].place_title,
+        "price": result[0].price
+      });
+    }
+  //  get image_path in images table from each listing
+    for(let i = 0; i < listing_id_array.length; i ++){
+      let sql = `SELECT * FROM airbnb.images WHERE listing_id = ?;`
+      let values = [listing_id_array[i]];
+      console.log(listing_data_array[i]);
+
+      app.con.query(sql, values, function(err, result){
+        if(err) return console.log(err);
+        listing_data_array[i]["image_path"] = result[0].image_path;
+          console.log(result);
+        if(i == listing_id_array.length - 1){
+          res.json({
+            "result" :  listing_data_array
+          });
+        }
+      });
+
+    }
+  })
+
+});
+
+
 
 //profile  section
 router.post("/insertProfileImagePath/:id/:profile_image_path", function(req, res){
