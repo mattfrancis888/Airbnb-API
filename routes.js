@@ -560,6 +560,69 @@ router.get("/getUserData/:id", function(req, res){
 
 //end of profile section
 
+//save date_listed
+
+router.post("/bookSchedule/:id/:listing_id", function(req, res){
+  //check if user already booked a schedule
+  let sql = `SELECT * FROM airbnb.bookings WHERE
+  airbnb.bookings.user_id = ? AND
+  airbnb.bookings.listing_id = ?`;
+  let values = [req.params.id, req.params.listing_id];
+  app.con.query(sql, values, function(err, result){
+    console.log("--INSERT BOOK--");
+    if(err) return console.log(err);
+      console.log(result);
+    if(result.length == 0){
+      console.log("Inserting book schedule");
+  // let sql = `INSERT INTO airbnb.testing(name) VALUES(?)`;
+  console.log(req.params.id + req.params.listing_id + req.body.check_in + req.body.check_out);
+      let sql = `INSERT INTO airbnb.bookings(user_id, listing_id, check_in, check_out) VALUES(?, ?, ?, ?)`;
+      let values = [req.params.id, req.params.listing_id, req.body.check_in, req.body.check_out];
+      app.con.query(sql, values, function(err, result){
+        if(err) return console.log(err);
+        console.log(`Inserted booking schedule`);
+      });
+    } else{
+          console.log("Updating book schedule");
+
+          let sql = `UPDATE airbnb.bookings SET
+          airbnb.bookings.check_in = ?,
+          airbnb.bookings.check_out = ?
+          WHERE airbnb.bookings.user_id = ?
+          AND airbnb.bookings.listing_id = ? ;`;
+          let values = [req.body.check_in, req.body.check_out, req.params.id, req.params.listing_id];
+
+          app.con.query(sql, values, function(err, result){
+            console.log("Upadating booking schedule");
+            if(err) return console.log(err);
+            console.log(`Updated booking schedule`);
+
+          });
+
+    }
+    res.sendStatus(200);
+  });
+});
+
+router.get("/getBookingSchedules/:id/:listing_id", function(req, res){
+
+    let sql = `SELECT * FROM airbnb.bookings WHERE
+    airbnb.bookings.user_id = ? AND
+    airbnb.bookings.listing_id = ?`;
+  let values = [req.params.id, req.params.listing_id];
+  app.con.query(sql, values, function(err, result){
+    console.log("Getting booking schedules");
+    if(err) return console.log(err);
+    res.json({
+       result
+    });
+  });
+
+});
+
+
+
+//if user already book an appointment update it
 
 
 module.exports = router;
