@@ -620,9 +620,61 @@ router.get("/getBookingSchedules/:id/:listing_id", function(req, res){
 
 });
 
+router.get("/bookingListingImageAndTitle/:user_id", function(req, res){
+  let sql = `SELECT * FROM airbnb.bookings WHERE user_id = ?;`
+  let values = [req.params.user_id];
+  let listing_array = [];
 
 
-//if user already book an appointment update it
+  //get listing id
+  app.con.query(sql, values, function(err, result){
+    for(let i = 0; i < result.length; i++){
+      listing_array.push({
+        listing_id: result[i].listing_id,
+        check_in: result[i].check_in,
+        check_out: result[i].check_out
+      });
+    }
+    console.log(listing_array.length);
+    console.log("FINISHED GETTING listing_id");
+    //get place_title
+    for(let i = 0; i < listing_array.length; i++){
+      let sql = `SELECT * FROM airbnb.listings WHERE id = ?;`
+      let values = [listing_array[i].listing_id];
+      app.con.query(sql, values, function(err, result){
+        console.log(result[0].place_title);
+        listing_array[i].place_title = result[0].place_title;
 
+          console.log("FINISHED GETTING place_title");
+        for(let i = 0; i < listing_array.length; i ++){
+          let sql = `SELECT * FROM airbnb.images WHERE listing_id = ?;`
+          let values = listing_array[i].listing_id;
+          console.log(values + "is the name");;
+
+          app.con.query(sql, values, function(err, result){
+            if(err) return console.log(err);
+            console.log(result[i].image_path);
+            listing_array[i].image_path = result[i].image_path;
+
+            if(i == listing_array.length - 1){
+              res.json({
+                "result" :  listing_array
+              });
+            }
+          });
+
+        }
+
+
+      });
+    }
+
+    //get image_path  in images table from each listing
+
+
+  });
+});
+
+//
 
 module.exports = router;
