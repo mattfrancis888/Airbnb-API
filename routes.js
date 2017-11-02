@@ -675,6 +675,210 @@ router.get("/bookingListingImageAndTitle/:user_id", function(req, res){
   });
 });
 
-//
+//edit listing
+router.post("/updateListingImages/:listing_id", function(req, res){
+      let sql = `INSERT INTO airbnb.images(image_path, caption, listing_id) VALUES(?, ?, ?)`;
+      let values = [req.body.image_path, req.body.caption, req.params.listing_id];
+      app.con.query(sql, values, function(err, result){
+          console.log("--UPDATE IMAGES--");
+          console.log(result);
+          res.sendStatus(200);
+      });
+});
+
+router.post("/updateCaption", function(req, res){
+
+      let sql = `UPDATE airbnb.images SET caption = ? WHERE image_path = ?;`;
+      let values = [req.body.caption, req.body.image_path];
+      app.con.query(sql, values, function(err, result){
+          console.log("--UPDATE CAPTION--");
+          if(err) return console.log(err);
+          console.log(result);
+          res.sendStatus(200);
+      });
+});
+
+router.post("/updateTitle/:listing_id", function(req, res){
+  let sql = `UPDATE airbnb.listings SET place_title = ? WHERE id = ?;`;
+  let values = [req.body.place_title, req.params.listing_id];
+
+  app.con.query(sql, values, function(err, result){
+    console.log("--UPDATE TITLE--");
+    if(err) return console.log(err);
+      console.log(result);
+      res.sendStatus(200);
+    });
+});
+
+router.post("/updateDescription/:listing_id", function(req, res){
+  let sql = `UPDATE airbnb.listings SET place_description = ? WHERE id = ?;`;
+  // let values = [req.body.place_title];
+
+    let values = [req.body.place_description, req.params.listing_id];
+    console.log(parseInt(req.params.i));
+    app.con.query(sql, values, function(err, result){
+      console.log("--UPDATE DESCRIPTION--");
+      if(err) return console.log(err);
+      console.log(result);
+      res.sendStatus(200);
+
+      });
+});
+
+router.post("/updateRoomsAndGuests/:listing_id", function(req, res){
+  let sql = `UPDATE airbnb.listings SET total_guest = ?,
+   total_bedrooms = ?,
+   total_beds = ?
+   WHERE id = ?;`;
+
+   console.log(req.body.total_guest,  req.body.total_bedrooms,req.body.total_beds, req.params.listing_id );
+  // let values = [req.body.place_title];
+
+    let values = [req.body.total_guest, req.body.total_bedrooms,
+      req.body.total_beds,req.params.listing_id];
+
+    app.con.query(sql, values, function(err, result){
+      console.log("--UPDATE ROOM AND GUEST--");
+      if(err) return console.log(err);
+      console.log(result);
+      res.sendStatus(200);
+    });
+});
+
+function stringBooleanToInteger(boolean){
+  if(boolean == true){
+    return 1;
+  } if(boolean == false){
+    return 0;
+  }
+}
+
+router.post("/updateAmenitiesItem/:listing_id", function(req, res){
+  let sql = `UPDATE airbnb.listings SET essentials = ?,
+  internet = ?, shampoo = ?, hangers = ?, tv = ?, heating = ?, air_conditioning = ?, breakfast = ?
+   WHERE id = ?;`;
+  // let values = [req.body.place_title];
+    console.log(req.body.internet + "is" + stringBooleanToInteger(req.body.internet));
+    let values = [stringBooleanToInteger(req.body.essentials),
+      stringBooleanToInteger(req.body.internet),
+      stringBooleanToInteger(req.body.shampoo),
+      stringBooleanToInteger(req.body.hangers),
+      stringBooleanToInteger(req.body.tv),
+      stringBooleanToInteger(req.body.heating),
+      stringBooleanToInteger(req.body.air_conditioning),
+      stringBooleanToInteger(req.body.breakfast),
+      req.params.listing_id];
+
+    app.con.query(sql, values, function(err, result){
+      console.log("--UPDATE AMENITIES ITEM--");
+      if(err) return console.log(err);
+      console.log(result);
+      res.sendStatus(200);
+    });
+});
+
+router.post("/updateAmenitiesSpace/:listing_id/", function(req, res){
+  let sql = `UPDATE airbnb.listings SET kitchen = ?, laundry = ?, parking = ?, elevator = ?, pool = ?, gym = ?
+   WHERE id = ?;`;
+  // let values = [req.body.place_title];
+
+    let values = [stringBooleanToInteger(req.body.kitchen),
+                  stringBooleanToInteger(req.body.laundry),
+                  stringBooleanToInteger(req.body.parking),
+                  stringBooleanToInteger(req.body.elevator),
+                  stringBooleanToInteger(req.body.pool),
+                  stringBooleanToInteger(req.body.gym),
+                  req.params.listing_id];
+
+    app.con.query(sql, values, function(err, result){
+      console.log("--UPDATE AMENITIES SPACE--");
+      if(err) return console.log(err);
+      console.log(result);
+      res.sendStatus(200);
+    });
+});
+
+router.post("/updateLocation/:listing_id/", function(req, res){
+  let sql = `UPDATE airbnb.listings SET country = ?,
+  street = ?, extra_place_details = ?, city = ?, state = ?
+   WHERE id = ?;`;
+  // let values = [req.body.place_title];
+  let values = [req.body.country,
+                req.body.street,
+                req.body.extra_place_details,
+                req.body.city,
+                req.body.state,
+                req.params.listing_id];
+
+    app.con.query(sql, values, function(err, result){
+      console.log("--UPDATE LOCATION--");
+      if(err) return console.log(err);
+
+      console.log(result);
+      res.sendStatus(200);
+    });
+});
+
+router.post("/updateHouseRules/:listing_id/", function(req, res){
+  let sql = `UPDATE airbnb.listings SET
+  suitable_for_children = ?, suitable_for_infants = ?, suitable_for_pets
+   = ?, smoking_allowed = ?, parties_allowed = ?, additional_rules = ?
+   WHERE id = ?;`;
+  // let values = [req.body.place_title];
+
+    let values = [stringBooleanToInteger(req.body.suitable_for_children),
+                  stringBooleanToInteger(req.body.suitable_for_infants),
+                  stringBooleanToInteger(req.body.suitable_for_pets),
+                  stringBooleanToInteger(req.body.smoking_allowed),
+                  stringBooleanToInteger(req.body.parties_allowed),
+                  req.body.additional_rules,
+                  req.params.listing_id];
+
+    app.con.query(sql, values, function(err, result){
+      if(err) return console.log(err);
+      console.log("--UPDATE HOUSE RULES--");
+      console.log(result);
+      res.sendStatus(200);
+    });
+});
+
+
+router.post("/updateBooking/:listing_id/", function(req, res){
+  let sql = `UPDATE airbnb.listings SET listing_length = ?,
+  arrive_after = ?, leave_before = ?, min_stay = ?, max_stay = ? WHERE id = ?;`;
+
+    let values = [req.body.listing_length,
+                  req.body.arrive_after,
+                  req.body.leave_before,
+                  req.body.min_stay,
+                  req.body.max_stay,
+                  req.params.listing_id];
+
+    app.con.query(sql, values, function(err, result){
+      console.log("--UPDATE BOOKING--");
+      if(err) return console.log(err);
+      console.log(result);
+      res.sendStatus(200);
+    });
+});
+
+router.post("/updatePrice/:listing_id/", function(req, res){
+  let sql = `UPDATE airbnb.listings SET price = ? WHERE id = ?`;
+
+    let values = [req.body.price,
+                  req.params.listing_id];
+
+    app.con.query(sql, values, function(err, result){
+      console.log("--UPDATE PRICE--");
+      if(err) return console.log(err);
+        console.log(result);
+        res.sendStatus(200);
+    });
+});
+
+
+
+
+//FIX IMAGESLIDER PAGE
 
 module.exports = router;
