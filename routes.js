@@ -877,7 +877,72 @@ router.post("/updatePrice/:listing_id/", function(req, res){
 });
 
 
+router.get("/bookingsToDeleteData/:listing_id", function(req, res){
+      let sql = `
+    SET @date_listed = (SELECT date_listed FROM airbnb.listings WHERE id = ?);
+    SET @listing_length = (SELECT listing_length FROM airbnb.listings where id = ?);
+    SET @listing_expiry = (DATE_ADD(@date_listed,INTERVAL @listing_length MONTH));
 
+
+    SELECT @listing_expiry ;
+    SELECT * from airbnb.bookings where user_id = ? and
+    check_in < @listing_expiry or check_out < @listing_expiry`;
+
+
+    let values = [req.params.listing_id, req.params.listing_id, req.params.listing_id, req.params.listing_id];
+
+    app.con.query(sql, values, function(err, result){
+      console.log("--BOOKINGS TO DELETE--");
+      if(err) return console.log(err);
+      let lastObjectInResult = result.length - 1;
+      console.log(result[lastObjectInResult][0].user_id + "is the user_id of the booking that is going to be deleted");
+      let user_id_array = [];
+      let listing_id_array = [];
+      let check_in_array = [];
+      let check_out_array = [];
+      for(let i = 0; i < result[lastObjectInResult].length; i ++){
+        user_id_array.push({"user_id" : result[lastObjectInResult][i].user_id});
+        listing_id_array.push({"listing_id" : result[lastObjectInResult][i].listing_id});
+        check_in_array.push({"check_in": result[lastObjectInResult][i].check_in});
+        check_out_array.push({"check_out": result[lastObjectInResult][i].check_out});
+      }
+      console.log(user_id_array);
+      res.json({
+        "user_id" :  user_id_array,
+        "listing_id" :listing_id_array,
+        "check_in" :  check_in_array,
+        "check_out" :check_out_array
+      });
+
+    });
+});
+
+
+
+router.delete("/deleteBookings/:id/", function(req, res){
+  let sql = `
+            start transaction;
+            SET @date_listed = (SELECT date_listed FROM airbnb.listings WHERE id = ?);
+            SET @listing_length = (SELECT listing_length FROM airbnb.listings where id = ?);
+
+            SET @listing_expiry = (
+            DATE_ADD(@date_listed,INTERVAL @listing_length MONTH)
+            );
+
+
+            DELETE from airbnb.bookings where user_id = ? AND
+              check_in < @listing_expiry or check_out < @listing_expiry  ;`;
+
+
+        let values = [req.params.listing_id, req.params.listing_id, req.params.listing_id, req.params.listing_id];
+
+    app.con.query(sql, values, function(err, result){
+      console.log("--DELETE DATE--");
+      if(err) return console.log(err);
+
+        res.sendStatus(200);
+    });
+});
 
 //FIX IMAGESLIDER PAGE
 
