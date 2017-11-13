@@ -251,15 +251,59 @@ router.post("/insertListingData", function(req,res){
 });
 
 
-router.get("/totalListingsData", function(req, res){
-  let sql = `SELECT COUNT(*) AS total_listings FROM airbnb.listings `;
-  app.con.query(sql, function(err, result) {
+router.get("/totalListingsData/:country/:street/:city/:state" +
+  "/:total_guest/:suitable_for_infants/:suitable_for_children/:suitable_for_pets", function(req, res){
+
+  if(req.params.country == " " )
+    req.params.country = "%";
+  else
+    req.params.country = "%" + req.params.country + "%"
+  if(req.params.street == " " )
+    req.params.street = "%";
+  else
+    req.params.street = "%" + req.params.street + "%"
+  if(req.params.city == " " )
+    req.params.city = "%";
+  else
+    req.params.city = "%" + req.params.city + "%";
+  if(req.params.state == " " )
+    req.params.state = "%";
+  else
+    req.params.state = "%" + req.params.state + "%";
+  if(req.params.total_guest == " " )
+    req.params.total_guest = "%";
+  else
+    req.params.total_guest =  parseInt(req.params.total_guest) ;
+  if(req.params.suitable_for_infants == " " )
+    req.params.suitable_for_infants = "%";
+  else
+      req.params.suitable_for_infants = parseInt(req.params.suitable_for_infants);
+  if(req.params.suitable_for_children == " " )
+    req.params.suitable_for_children = "%";
+  else
+    req.params.suitable_for_children = parseInt(req.params.suitable_for_children);
+  if(req.params.suitable_for_pets == " " )
+    req.params.suitable_for_pets = "%";
+  else
+    req.params.suitable_for_pets = parseInt(req.params.suitable_for_pets);
+
+  let sql = `SELECT COUNT(*) AS total_listings FROM airbnb.listings
+  WHERE country LIKE ?  AND street LIKE ? AND city LIKE ? AND state LIKE ? AND CAST(total_guest AS UNSIGNED) >= ?
+    AND suitable_for_infants LIKE ? AND suitable_for_children LIKE ? AND suitable_for_pets LIKE ?`;
+
+
+  let values = [req.params.country, req.params.street, req.params.city, req.params.state, req.params.total_guest,
+  req.params.suitable_for_infants, req.params.suitable_for_children, req.params.suitable_for_pets];
+
+  app.con.query(sql, values, function(err, result) {
     if(err) return console.log(err);
     console.log("--TOTAL LISTINGS ---");
+    console.log("SQL:" + sql);
+    console.log("values:"  + values);
     res.json({
       "total_listings": result[0].total_listings
     })
-    console.log(result[0].total_listings);
+    // console.log(result[0].total_listings);
   });
 });
 
@@ -395,10 +439,12 @@ router.get("/listingData/:id", function(req, res){
 });
 
 
-router.get("/multipleListingsData/:showRowsAfter/:showAmountOfRows", function(req, res){
+
+router.get("/multipleListingsData/:showRowsAfter/:showAmountOfRows/:country/:street/:city/:state" +
+  "/:total_guest/:suitable_for_infants/:suitable_for_children/:suitable_for_pets", function(req, res){
   console.log("--MULTIPLE LISTING DATA--");
-  let sql = `SELECT * FROM airbnb.listings LIMIT ?, 4`;
-  let values = [parseInt(req.params.showRowsAfter)];
+  let sql = `SELECT * FROM airbnb.listings LIMIT ?, ?`;
+  let values = [parseInt(req.params.showRowsAfter), parseInt(req.params.showAmountOfRows)];
   let listing_id_array = [];
   let listing_data_array = [];
 
@@ -439,6 +485,8 @@ router.get("/multipleListingsData/:showRowsAfter/:showAmountOfRows", function(re
   })
 
 });
+
+
 
 
 
@@ -944,6 +992,68 @@ router.delete("/deleteBookings/:id/", function(req, res){
     });
 });
 
+
+// router.get(`/searchFilter/:country/:street/:city/:state/
+// :total_guest/:suitable_for_infants/:suitable_for_children/:suitable_for_pets`, function(req, res){
+//   let sql = 'SELECT * FROM airbnb.listings WHERE country = ?';
+//   let values = [req.params.country];
+//
+//   app.con.query(sql, values, function(err, result){
+//     if(err) return err;
+//     console.log("--SEARCH FILTER--");
+//     console.log(result);
+//     res.sendStatus(200);
+//   });
+// });
+
+router.get(`/searchFilter/:country/:street/:state`, function(req, res){
+  let sql = 'SELECT * FROM airbnb.listings WHERE country = ? AND state = ?';
+  let values = [req.params.country, req.params.state];
+
+  app.con.query(sql, values, function(err, result){
+    if(err) return err;
+    console.log("--SEARCH FILTER--");
+    let listing_id_array = [];
+    let listing_data_array = [];
+
+
+    //get place_title and listing_id (for images table) in listing table
+    app.con.query(sql, values, function(err, result){
+      if(err) return console.log(err);
+      console.log(result);
+      for(let i = 0; i < result.length; i++){
+        listing_id_array.push(result[i].id);
+        listing_data_array.push({
+          "id":result[i].id,
+          "property_ownership": result[0].property_ownership,
+          "property_type" : result[0].property_type,
+          "total_beds": result[0].total_beds,
+          "place_title": result[i].place_title,
+          "price": result[0].price
+        });
+      }
+    //  get image_path in images table from each listing
+      for(let i = 0; i < listing_id_array.length; i ++){
+        let sql = `SELECT * FROM airbnb.images WHERE listing_id = ?;`
+        let values = [listing_id_array[i]];
+        console.log(listing_data_array[i]);
+
+        app.con.query(sql, values, function(err, result){
+          if(err) return console.log(err);
+          listing_data_array[i]["image_path"] = result[0].image_path;
+            console.log(result);
+          if(i == listing_id_array.length - 1){
+            res.json({
+              "result" :  listing_data_array
+            });
+          }
+        });
+
+      }
+    })
+
+  });
+});
 //FIX IMAGESLIDER PAGE
 
 module.exports = router;
