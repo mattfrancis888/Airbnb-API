@@ -384,6 +384,7 @@ router.get("/listingData/:id", function(req, res){
     console.log(result);
   res.json({
         "id": result[0].id,
+        "user_id": result[0].user_id,
         "property_ownership": result[0].property_ownership,
         "property_type" : result[0].property_type,
         "total_guest": result[0].total_guest,
