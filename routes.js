@@ -27,15 +27,6 @@ router.get("/hi", function(req, res,next){
 });
 
 
-    router.post("/insertTestData/:name", function(req, res){
-      console.log("Hello");
-      let sql = `INSERT INTO airbnb.testing(name) VALUES(?)`;
-      let values = [req.params.name];
-      app.con.query(sql, values, function (err, result) {
-        console.log(result);
-      });
-    });
-
 router.get("/", function(req, res){
   let sql = "SELECT * FROM airbnb.user_authentication";
   console.log("Hey");
@@ -64,6 +55,7 @@ router.get("/findUser/:email", function(req, res){
     if(error){
       console.log("Error");
       console.log(error);
+      return error;
     }
   });
 });
@@ -85,7 +77,9 @@ router.post("/register", function(req, res){
     app.con.query(sql, values, function(err, result) {
       if(err) return console.log(err);
       console.log("1 record inserted");
+      res.sendStatus(200);
     });
+
 
   })
   .catch((error) => console.log(error));
