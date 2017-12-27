@@ -338,6 +338,13 @@ router.get("/listingImageAndTitle/:user_id", function(req, res){
         place_title: result[i].place_title
       });
     }
+    //empty booking list
+    if(view_listing_id_array.length == 0){
+      res.json({
+        "result" :  view_listing_data_array
+      });
+      return;
+    }
     //get image_path  in images table from each listing
     for(let i = 0; i < view_listing_id_array.length; i ++){
       let sql = `SELECT * FROM airbnb.images WHERE listing_id = ?;`
@@ -679,7 +686,16 @@ router.get("/bookingListingImageAndTitle/:user_id", function(req, res){
       });
     }
     console.log(listing_array.length);
+
     console.log("FINISHED GETTING listing_id");
+    //nothing on booking list
+    if(listing_array.length == 0){
+      res.json({
+        "result" :  listing_array
+      });
+      return;
+    }
+
     //get place_title
     for(let i = 0; i < listing_array.length; i++){
       let sql = `SELECT * FROM airbnb.listings WHERE id = ?;`
